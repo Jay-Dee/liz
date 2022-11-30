@@ -2,7 +2,7 @@
 
 namespace ProductImageFactory
 {
-    public class ProductImage
+    public class ProductImage : IProductImage
     {
         private readonly Uri _uri;
 

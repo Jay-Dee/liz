@@ -3,12 +3,7 @@ using System.Threading;
 
 namespace ProductImageFactory
 {
-    public interface IProductImageFactory
-    {
-        ProductImage Create(Uri uri);
-    }
-
-    internal class ProductImageFactory : IProductImageFactory
+    public class ProductImageFactory : IProductImageFactory
     {
         public ProductImage Create(Uri uri)
         {
