@@ -4,5 +4,5 @@ namespace ProductImageFactory;
 
 public interface IProductImageFactory
 {
-    ProductImage Create(Uri uri);
+    IProductImage Create(Uri uri);
 }
