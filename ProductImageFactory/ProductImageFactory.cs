@@ -9,8 +9,13 @@ namespace ProductImageFactory
         private readonly IDictionary<string, IProductImage> _cachedProductImages;
 
         public ProductImageFactory()
+            :this(new Dictionary<string, IProductImage>())
         {
-            _cachedProductImages = new Dictionary<string, IProductImage>();
+        }
+
+        public ProductImageFactory(IDictionary<string, IProductImage> cacheHelper)
+        {
+            _cachedProductImages = cacheHelper;
         }
 
         public IProductImage Create(Uri uri)
