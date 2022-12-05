@@ -1,8 +1,4 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Moq;
 using Xunit;
 
@@ -58,20 +54,22 @@ namespace ProductImageFactory.Tests {
             Assert.Equal($"Item with Key = {stubKey} has expired at {creationTime.AddMinutes(10):dd-MMM-yyyy hh:mm:ss:ffff}", expiredException.Message);
         }
 
-        [Fact]
-        public void Add_MultipleTimes_ReturnsLatestObject()
+        [Theory]
+        [InlineData(1)]
+        [InlineData(2)]
+        [InlineData(5)]
+        [InlineData(10)]
+        public void Add_MultipleTimes_ReturnsLatestObject(int numberOfTimesToAdd)
         {
-            var stubObj1 = new object();
-            var stubObj2 = new object();
             var cacheHelper = new CacheHelper<object>();
-            cacheHelper.Add("key", stubObj1);
 
-            var objAfterFirstAdd = cacheHelper["key"];
-            Assert.Equal(stubObj1, objAfterFirstAdd);
+            for (int addCounter = 0; addCounter < numberOfTimesToAdd; addCounter++)
+            {
+                var stubObj = new object();
+                cacheHelper.Add("key", stubObj);
 
-            cacheHelper.Add("key", stubObj2);
-            var objAfterSecondAdd = cacheHelper["key"];
-            Assert.Equal(stubObj2, objAfterSecondAdd);
+                Assert.Equal(stubObj, cacheHelper["key"]);
+            }
         }
     }
 }

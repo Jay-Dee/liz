@@ -1,12 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reflection.Metadata.Ecma335;
-using System.Text;
-using System.Threading.Tasks;
 
-namespace ProductImageFactory {
-    public class CacheHelper<TCacheObject> 
+namespace ProductImageFactory
+{
+    public class CacheHelper<TCacheObject>
         : ICacheHelper<TCacheObject> where TCacheObject : class
     {
         private const int CacheLifeTimeInMinutes = 10;
@@ -35,6 +32,7 @@ namespace ProductImageFactory {
             {
                 _internalCache.Remove(key);
             }
+
             var cacheItem = new CachedItem<TCacheObject>(value, _timeProvider.GetCurrentDateTime());
             _internalCache.Add(key, cacheItem);
         }
@@ -43,14 +41,14 @@ namespace ProductImageFactory {
 
         private TCacheObject ExtractExistingUnExpiredObject(string key)
         {
-
             if (ContainsKey(key))
             {
                 var cachedItem = _internalCache[key];
                 var cacheItemExpiry = cachedItem.CreationDateTimeOffset.AddMinutes(CacheLifeTimeInMinutes);
-                return cacheItemExpiry > _timeProvider.GetCurrentDateTime() 
-                    ? cachedItem.CacheItem 
-                    : throw new CacheItemExpiredException($"Item with Key = {key} has expired at {cacheItemExpiry:dd-MMM-yyyy hh:mm:sss:ffff}");
+                return cacheItemExpiry > _timeProvider.GetCurrentDateTime()
+                    ? cachedItem.CacheItem
+                    : throw new CacheItemExpiredException(
+                        $"Item with Key = {key} has expired at {cacheItemExpiry:dd-MMM-yyyy hh:mm:sss:ffff}");
             }
 
             throw new CacheItemNotFoundException($"Item not found for Key = {key}");
@@ -61,15 +59,13 @@ namespace ProductImageFactory {
     {
         public CacheItemNotFoundException(string exceptionMessage) : base(exceptionMessage)
         {
-            
         }
     }
 
     public class CacheItemExpiredException : Exception
     {
-        public CacheItemExpiredException(string exceptionMessage) : base(exceptionMessage) 
+        public CacheItemExpiredException(string exceptionMessage) : base(exceptionMessage)
         {
-            
         }
     }
 }
