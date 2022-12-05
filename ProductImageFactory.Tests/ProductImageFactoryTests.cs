@@ -14,7 +14,7 @@ public class ProductImageFactoryTests
     [InlineData(2)]
     [InlineData(5)]
     [InlineData(10)]
-    public void Create_Once_WithValidUrl_ReturnsValidProductImage(int numberOfImagesToCreate)
+    public void Create_DifferentImages_WithValidUrl_ReturnsValidProductImage(int numberOfImagesToCreate)
     {
         var mqCacheHelper = new Mock<ICacheHelper<IProductImage>>(MockBehavior.Strict);
 

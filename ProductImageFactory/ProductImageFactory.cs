@@ -6,27 +6,26 @@ namespace ProductImageFactory
 {
     public class ProductImageFactory : IProductImageFactory
     {
-        private readonly ICacheHelper<IProductImage> _cachedProductImages;
+        private readonly ICacheHelper<IProductImage> _cacheHelper;
 
         public ProductImageFactory()
-            :this(new CacheHelper<IProductImage>())
-        {
+            : this(new CacheHelper<IProductImage>()) {
         }
 
-        public ProductImageFactory(ICacheHelper<IProductImage> cacheHelper)
+        public ProductImageFactory(ICacheHelper<IProductImage> cacheHelper) 
         {
-            _cachedProductImages = cacheHelper;
+            _cacheHelper = cacheHelper;
         }
 
         public IProductImage Create(Uri uri)
         {
-            if (!_cachedProductImages.ContainsKey(uri.ToString()))
+            if (!_cacheHelper.ContainsKey(uri.ToString()))
             {
                 //Getting image over a slow link takes ages..
                 Thread.Sleep(1000);
-                _cachedProductImages.Add(uri.ToString(), new ProductImage(uri));
+                _cacheHelper.Add(uri.ToString(), new ProductImage(uri));
             }
-            return _cachedProductImages[uri.ToString()];
+            return _cacheHelper[uri.ToString()];
         }
     }
 }

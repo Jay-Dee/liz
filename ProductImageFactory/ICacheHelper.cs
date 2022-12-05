@@ -5,11 +5,12 @@ using System.Text;
 using System.Threading.Tasks;
 
 namespace ProductImageFactory {
-    public interface ICacheHelper<TCacheObject> {
-        bool ContainsKey(string key);
+    public interface ICacheHelper<TItem>
+    {
+        public bool ContainsKey(string key);
 
-        void Add(string key, TCacheObject value);
+        public void Add(string key, TItem value);
 
-        TCacheObject this[string key] { get; }
+        public TItem this[string key] { get; }
     }
 }
