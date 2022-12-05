@@ -31,6 +31,10 @@ namespace ProductImageFactory {
 
         public void Add(string key, TCacheObject value)
         {
+            if (_internalCache.ContainsKey(key))
+            {
+                _internalCache.Remove(key);
+            }
             var cacheItem = new CachedItem<TCacheObject>(value, _timeProvider.GetCurrentDateTime());
             _internalCache.Add(key, cacheItem);
         }
