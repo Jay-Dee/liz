@@ -19,13 +19,43 @@ namespace ProductImageFactory
 
         public IProductImage Create(Uri uri)
         {
-            if (!_cacheHelper.ContainsKey(uri.ToString()))
+            IProductImage createdProductImage;
+
+            try
             {
-                //Getting image over a slow link takes ages..
-                Thread.Sleep(1000);
-                _cacheHelper.Add(uri.ToString(), new ProductImage(uri));
+                if (_cacheHelper.ContainsKey(uri.ToString()))
+                {
+                    createdProductImage = _cacheHelper[uri.ToString()];
+                }
+                else
+                {
+                    createdProductImage = CreateAndAddToCache(uri);
+                }
+                
             }
-            return _cacheHelper[uri.ToString()];
+            catch (Exception ex)
+            {
+                if (ex is CacheItemExpiredException or CacheItemNotFoundException)
+                {
+                    createdProductImage = CreateAndAddToCache(uri);
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return createdProductImage;
+        }
+
+        private IProductImage CreateAndAddToCache(Uri uri)
+        {
+            //Getting image over a slow link takes ages..
+            Thread.Sleep(1000);
+            IProductImage createdProductImage = new ProductImage(uri);
+            _cacheHelper.Add(uri.ToString(), createdProductImage);
+
+            return createdProductImage;
         }
     }
 }
