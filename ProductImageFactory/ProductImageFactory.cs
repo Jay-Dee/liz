@@ -6,14 +6,14 @@ namespace ProductImageFactory
 {
     public class ProductImageFactory : IProductImageFactory
     {
-        private readonly IDictionary<string, IProductImage> _cachedProductImages;
+        private readonly ICacheHelper<IProductImage> _cachedProductImages;
 
         public ProductImageFactory()
-            :this(new Dictionary<string, IProductImage>())
+            :this(new CacheHelper<IProductImage>())
         {
         }
 
-        public ProductImageFactory(IDictionary<string, IProductImage> cacheHelper)
+        public ProductImageFactory(ICacheHelper<IProductImage> cacheHelper)
         {
             _cachedProductImages = cacheHelper;
         }

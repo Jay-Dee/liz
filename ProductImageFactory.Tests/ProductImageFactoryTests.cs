@@ -3,47 +3,71 @@ using System.Collections.Generic;
 using System.Threading.Tasks;
 using Moq;
 using Xunit;
+using static System.Net.Mime.MediaTypeNames;
 
 namespace ProductImageFactory.Tests;
 
 public class ProductImageFactoryTests
 {
-    [Fact]
-    public void Create_WithValidUrl_ReturnsValidProductImage()
+    [Theory]
+    [InlineData(1)]
+    [InlineData(2)]
+    [InlineData(5)]
+    [InlineData(10)]
+    public void Create_Once_WithValidUrl_ReturnsValidProductImage(int numberOfImagesToCreate)
     {
-        var stubUri = new Uri("https://github.com/Jay-Dee/liz");
-        var factory = new ProductImageFactory();
+        var mqCacheHelper = new Mock<ICacheHelper<IProductImage>>(MockBehavior.Strict);
 
-        var image = factory.Create(stubUri);
+        for (int creationCounter = 0; creationCounter < numberOfImagesToCreate; creationCounter++)
+        {
+            var stubUri = new Uri($"https://github.com/Jay-Dee/liz/{creationCounter}");
+            var mqProduct = new Mock<IProductImage>();
+            mqProduct.Setup(_ => _.ToString()).Returns(stubUri.ToString);
+            mqCacheHelper.Setup(_ => _.ContainsKey(stubUri.ToString())).Returns(true);
+            mqCacheHelper.SetupGet(_ => _[stubUri.ToString()]).Returns(mqProduct.Object);
+        }
+        
+        var factory = new ProductImageFactory(mqCacheHelper.Object);
 
-        Assert.NotNull(image);
-        Assert.Equal(stubUri.ToString(), image.ToString());
+        for (int creationCounter = 0; creationCounter < numberOfImagesToCreate; creationCounter++)
+        {
+            var stubUri = new Uri($"https://github.com/Jay-Dee/liz/{creationCounter}");
+
+            var image = factory.Create(stubUri);
+
+            Assert.NotNull(image);
+            Assert.Equal(stubUri.ToString(), image.ToString());
+
+            mqCacheHelper.Verify(_ => _.ContainsKey(stubUri.ToString()), Times.Once);
+            mqCacheHelper.Verify(_ => _[stubUri.ToString()], Times.Once);
+        }
     }
 
-    [Fact]
-    public void CreateTwice_WithValidUrl_ReturnsValidProductImage()
+    [Theory]
+    [InlineData(1)]
+    [InlineData(2)]
+    [InlineData(5)]
+    [InlineData(10)]
+    public void Create_SameImage_WithValidUrl_ReturnsValidProductImage(int numberOfTimesToCreate)
     {
         var stubUri = new Uri("https://github.com/Jay-Dee/liz");
         var mqProduct = new Mock<IProductImage>();
         mqProduct.Setup(_ => _.ToString()).Returns(stubUri.ToString);
-        var outProductImage = mqProduct.Object;
-        var mqCacheHelper = new Mock<IDictionary<string, IProductImage>>(MockBehavior.Strict);
+        var mqCacheHelper = new Mock<ICacheHelper<IProductImage>>(MockBehavior.Strict);
         mqCacheHelper.Setup(_ => _.ContainsKey(stubUri.ToString())).Returns(true);
-        mqCacheHelper.Setup(_ => _.TryGetValue(stubUri.ToString(), out outProductImage)).Returns(true);
-        mqCacheHelper.SetupGet(_ => _[stubUri.ToString()]).Returns(outProductImage);
+        mqCacheHelper.SetupGet(_ => _[stubUri.ToString()]).Returns(mqProduct.Object);
 
         var factory = new ProductImageFactory(mqCacheHelper.Object);
 
-        var image1 = factory.Create(stubUri);
-        var image2 = factory.Create(stubUri);
+        for (int creationCounter = 0; creationCounter < numberOfTimesToCreate; creationCounter++)
+        {
+            var createdImage = factory.Create(stubUri);
 
-        Assert.NotNull(image1);
-        Assert.Equal(mqProduct.Object, image1);
-        Assert.Equal(stubUri.ToString(), image1.ToString());
-        Assert.NotNull(image2);
-        Assert.Equal(mqProduct.Object, image2);
-        Assert.Equal(stubUri.ToString(), image2.ToString());
-        mqCacheHelper.Verify(_ => _.ContainsKey(stubUri.ToString()), Times.Exactly(2));
-        mqCacheHelper.Verify(_ => _[stubUri.ToString()], Times.Exactly(2));
+            Assert.NotNull(createdImage);
+            Assert.Equal(mqProduct.Object, createdImage); // verifies usage of cached object
+            Assert.Equal(stubUri.ToString(), createdImage.ToString());
+        }
+        mqCacheHelper.Verify(_ => _.ContainsKey(stubUri.ToString()), Times.Exactly(numberOfTimesToCreate));
+        mqCacheHelper.Verify(_ => _[stubUri.ToString()], Times.Exactly(numberOfTimesToCreate));
     }
 }
